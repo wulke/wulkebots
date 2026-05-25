@@ -37,7 +37,7 @@ _No handoff yet — first session._
 
 ## GitHub
 
-- **Repo**: https://github.com/trevorwulke/wulkebots (create after auth)
+- **Repo**: https://github.com/wulke/wulkebots
 - **MVP Milestone**: All issues tagged `mvp` must be closed before first real-user test
 - **Issue convention**: one issue = one discrete behavior; link to the relevant EARS spec ID when it exists
 
