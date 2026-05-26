@@ -9,6 +9,11 @@ A mobile-first web app where kids take pictures of their drawings and turn them 
 - **Image storage**: Local filesystem (mounted volume in Docker)
 - **Auth**: JWT sessions (no third-party auth provider)
 - **Deployment**: Docker
+- **Testing**: Vitest + `@testing-library/react` — config at `vitest.config.ts`; use `jsdom` env for components, `node` env for API routes and middleware
+
+## Agent Instructions
+
+@AGENTS.md
 
 ## Working Process
 
