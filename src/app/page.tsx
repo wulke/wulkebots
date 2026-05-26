@@ -1,6 +1,5 @@
 import React from 'react';
 
-// @spec INFRA-CFG-001
 export default function HomePage() {
   return (
     <main>

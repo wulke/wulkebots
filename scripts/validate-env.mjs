@@ -1,26 +1,8 @@
-const MINIMUM_JWT_SECRET_LENGTH = 32;
+import { validateEnv } from '../src/env.mjs';
 
-function requireValue(name, value) {
-  const trimmedValue = value?.trim();
-
-  if (!trimmedValue) {
-    throw new Error(`${name} is required`);
-  }
-
-  return trimmedValue;
-}
-
+// @spec INFRA-ENV-001, INFRA-ENV-002, INFRA-ENV-003
 try {
-  const jwtSecret = requireValue('JWT_SECRET', process.env.JWT_SECRET);
-
-  if (jwtSecret.length < MINIMUM_JWT_SECRET_LENGTH) {
-    throw new Error(
-      `JWT_SECRET must be at least ${MINIMUM_JWT_SECRET_LENGTH} characters long`,
-    );
-  }
-
-  requireValue('DATABASE_URL', process.env.DATABASE_URL);
-  requireValue('UPLOADS_DIR', process.env.UPLOADS_DIR);
+  validateEnv(process.env);
 } catch (error) {
   const message = error instanceof Error ? error.message : String(error);
   console.error(`Startup validation failed: ${message}`);

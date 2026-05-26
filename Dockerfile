@@ -1,5 +1,6 @@
 FROM node:20-alpine AS deps
 WORKDIR /app
+RUN apk add --no-cache python3 make g++
 COPY package.json package-lock.json ./
 RUN npm ci
 
@@ -19,7 +20,10 @@ ENV PORT=3000
 COPY --from=builder /app/.next/standalone ./.next/standalone
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/scripts ./scripts
+COPY --from=builder /app/scripts ./.next/standalone/scripts
+COPY --from=builder /app/src/env.mjs ./.next/standalone/src/env.mjs
+COPY --from=builder /app/src/db ./.next/standalone/src/db
+COPY --from=builder /app/node_modules ./.next/standalone/node_modules
 COPY --from=builder /app/docker ./docker
 
 RUN chmod +x ./docker/entrypoint.sh

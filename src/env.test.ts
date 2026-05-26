@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { validateEnv } from './env';
+import { validateEnv } from './env.mjs';
 
 describe('validateEnv', () => {
   // @spec INFRA-ENV-001
