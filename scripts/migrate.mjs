@@ -51,6 +51,7 @@ export async function runMigrations({
   console.log('Migration step completed.');
 }
 
+// @spec INFRA-DB-003
 export function handleMigrationFailure(error, processImpl = process, consoleImpl = console) {
   const message = error instanceof Error ? error.message : String(error);
   consoleImpl.error(`Migration step failed: ${message}`);
