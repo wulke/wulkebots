@@ -1,3 +1,5 @@
+import React from 'react';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -36,7 +38,12 @@ describe('ViewerClient', () => {
     expect(figure).toHaveStyle({ transform: 'translate(-64px, -32px)' });
 
     fireEvent.click(screen.getByRole('button', { name: 'Robo Rex' }));
-    expect(screen.getByText('First quote')).toBeVisible();
+    const speechBubble = screen.getByRole('status');
+    expect(speechBubble).toHaveTextContent('First quote');
+    expect(speechBubble).toHaveStyle({
+      maxWidth: '80vw',
+      wordBreak: 'break-word',
+    });
     expect(figure).toHaveAttribute('data-bouncing', 'true');
 
     fireEvent.click(screen.getByRole('button', { name: 'Robo Rex' }));
@@ -45,8 +52,15 @@ describe('ViewerClient', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Robo Rex' }));
     expect(screen.getByText('First quote')).toBeVisible();
 
-    fireEvent.error(image);
-    expect(screen.getByTestId('viewer-placeholder')).toBeVisible();
+    fireEvent.error(screen.getByAltText('Robo Rex'));
+    const placeholder = screen.getByTestId('viewer-placeholder');
+    expect(placeholder).toBeVisible();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Move right' }));
+    expect(figure).toHaveStyle({ transform: 'translate(-32px, -32px)' });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Robo Rex' }));
+    expect(screen.getByText('Second quote')).toBeVisible();
 
     expect(fetchSpy).not.toHaveBeenCalled();
 
@@ -57,11 +71,11 @@ describe('ViewerClient', () => {
         quotes={['First quote', 'Second quote']}
       />,
     );
-    expect(screen.getByText('First quote')).toBeVisible();
+    expect(screen.getByText('Second quote')).toBeVisible();
 
     unmount();
 
-    render(
+    const remounted = render(
       <ViewerClient
         botName="Robo Rex"
         imageUrl="/api/images/17/drawing.png"
@@ -71,6 +85,7 @@ describe('ViewerClient', () => {
 
     expect(screen.queryByText('First quote')).not.toBeInTheDocument();
     expect(screen.getByTestId('viewer-figure')).toHaveStyle({ transform: 'translate(0px, 0px)' });
+    remounted.unmount();
 
     fetchSpy.mockRestore();
   });
