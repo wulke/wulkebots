@@ -1,0 +1,18 @@
+services:
+  app:
+    build:
+      context: .
+    ports:
+      - "3000:3000"
+    environment:
+      JWT_SECRET: ${JWT_SECRET}
+      DATABASE_URL: ${DATABASE_URL}
+      UPLOADS_DIR: ${UPLOADS_DIR}
+      PORT: ${PORT:-3000}
+    volumes:
+      - wulkebots_data:/data
+      - wulkebots_uploads:/uploads
+
+volumes:
+  wulkebots_data:
+  wulkebots_uploads:
