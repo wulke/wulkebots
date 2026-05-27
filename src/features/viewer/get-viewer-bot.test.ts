@@ -4,16 +4,22 @@ import Database from 'better-sqlite3';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import { beforeEach, describe, expect, it } from 'vitest';
 
+import type { DatabaseClient } from '@/db/client';
+import * as schema from '@/db/schema';
 import { bots, quotes, users } from '@/db/schema';
 
 import { getViewerBot } from './get-viewer-bot';
 
+function createInMemorySqlite() {
+  return new Database(':memory:');
+}
+
 describe('getViewerBot', () => {
-  let sqlite: Database.Database;
-  let db: ReturnType<typeof drizzle>;
+  let sqlite: ReturnType<typeof createInMemorySqlite>;
+  let db: DatabaseClient;
 
   beforeEach(() => {
-    sqlite = new Database(':memory:');
+    sqlite = createInMemorySqlite();
     sqlite.exec(`
       CREATE TABLE users (
         id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -48,7 +54,7 @@ describe('getViewerBot', () => {
 
       CREATE INDEX quotes_bot_id_idx ON quotes (bot_id);
     `);
-    db = drizzle(sqlite, { schema: { bots, quotes, users } });
+    db = drizzle(sqlite, { schema });
   });
 
   // @spec VIEW-DATA-001
