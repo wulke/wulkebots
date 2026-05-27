@@ -20,17 +20,31 @@ Do not start other issues.
 
 ## Branch Naming and Issue Claiming
 
-Create a branch before making any changes:
+Every feature and bug fix uses a **two-branch, two-PR flow**:
 
-- Bug:     `bug/[issue-number]-[short-description]`
+| Branch | Targets | Purpose |
+|---|---|---|
+| `feature/[n]-[desc]-tests` | `main` | Red PR — tests only, CI will fail |
+| `feature/[n]-[desc]` | `feature/[n]-[desc]-tests` | Green PR — implementation |
+
+The `-tests` branch is opened as a PR first. CI will fail (tests are red by design) so it
+cannot merge. Once the implementation PR merges into the tests branch, CI goes green and
+the tests PR can merge to `main`.
+
+Branch type prefixes:
 - Feature: `feature/[issue-number]-[short-description]`
+- Bug:     `bug/[issue-number]-[short-description]`
 - Other:   `chore/[issue-number]-[short-description]`
 
-Immediately after creating the branch, claim the issue:
+Steps:
+
+1. Create the `-tests` branch off `main` and open a draft PR targeting `main`.
+2. Create the impl branch off the `-tests` branch and open a PR targeting the `-tests` branch.
+3. Claim the issue on the `-tests` branch:
 
 ```sh
 gh issue edit [number] --add-label "in-progress"
-gh issue comment [number] --body "Starting work on branch \`[branch-name]\`."
+gh issue comment [number] --body "Starting work on branch \`[tests-branch-name]\`."
 ```
 
 ---
@@ -128,14 +142,31 @@ it('creates user record and redirects on valid registration', async () => { ... 
 
 ---
 
-## Pull Request
+## Pull Requests
 
-When done: push your branch and open a PR referencing the issue
-(e.g. `Closes #[number]`). Describe what changed and why. Do not merge.
+Open two PRs per issue following the two-branch flow:
+
+**PR 1 — Tests (Red)**
+- Branch: `feature/[n]-[desc]-tests` → `main`
+- Open as a draft PR. CI will fail — this is expected.
+- Title prefix: `[Tests]`
+- Body should describe what behaviors the tests cover and which EARS IDs they cite.
+
+**PR 2 — Implementation (Green)**
+- Branch: `feature/[n]-[desc]` → `feature/[n]-[desc]-tests`
+- Must pass CI (all tests green, type-check clean).
+- Title prefix: `[Impl]`
+- Body must reference the issue and the tests PR: `Closes #[number]`
 
 ```sh
-gh pr create --title "[short title]" --body "Closes #[number]\n\n[description]"
+# Tests PR (opened first, will be red)
+gh pr create --title "[Tests] [short title]" --body "Tests for #[number]\n\n[what behaviors are covered]" --draft
+
+# Implementation PR (opened after, targets the tests branch)
+gh pr create --title "[Impl] [short title]" --body "Closes #[number]\n\n[what changed and why]" --base "feature/[n]-[desc]-tests"
 ```
+
+Do not merge your own PRs.
 
 ---
 
