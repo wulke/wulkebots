@@ -43,7 +43,7 @@ describe('runMigrations integration', () => {
       } as NodeJS.ProcessEnv,
     });
 
-    const sqlite = new Database(databaseUrl, { readonly: true });
+    const sqlite = new Database(databaseUrl);
 
     try {
       const tableNames = sqlite
@@ -59,6 +59,12 @@ describe('runMigrations integration', () => {
       const quotesForeignKeys = sqlite
         .prepare("PRAGMA foreign_key_list('quotes')")
         .all() as SqliteForeignKey[];
+      const insertUser = sqlite.prepare(
+        "INSERT INTO users (email, password_hash) VALUES ('parent@example.com', 'hash')",
+      );
+      const insertBot = sqlite.prepare(
+        'INSERT INTO bots (user_id, name, image_path, share_token) VALUES (?, ?, ?, ?)',
+      );
 
       expect(tableNames.map(({ name }) => name)).toEqual(
         expect.arrayContaining(['users', 'bots', 'quotes']),
@@ -117,6 +123,16 @@ describe('runMigrations integration', () => {
           }),
         ]),
       );
+
+      const { lastInsertRowid: userId } = insertUser.run();
+      insertBot.run(userId, 'Robo Rex', '1/drawing.jpg', 'duplicate-token');
+
+      expect(() =>
+        insertBot.run(userId, 'Space Cat', '2/drawing.jpg', 'duplicate-token'),
+      ).toThrow(/UNIQUE constraint failed: bots\.share_token/);
+      expect(() =>
+        insertBot.run(userId, 'Bad Path Bot', '/absolute/path', 'unique-token'),
+      ).toThrow(/CHECK constraint failed: bots_image_path_relative/);
     } finally {
       sqlite.close();
     }
