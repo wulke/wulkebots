@@ -23,7 +23,10 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/scripts ./.next/standalone/scripts
 COPY --from=builder /app/src/env.mjs ./.next/standalone/src/env.mjs
 COPY --from=builder /app/src/db ./.next/standalone/src/db
-COPY --from=builder /app/node_modules ./.next/standalone/node_modules
+COPY --from=builder /app/node_modules/better-sqlite3 ./.next/standalone/node_modules/better-sqlite3
+COPY --from=builder /app/node_modules/bindings ./.next/standalone/node_modules/bindings
+COPY --from=builder /app/node_modules/drizzle-orm ./.next/standalone/node_modules/drizzle-orm
+COPY --from=builder /app/node_modules/file-uri-to-path ./.next/standalone/node_modules/file-uri-to-path
 COPY --from=builder /app/docker ./docker
 
 RUN chmod +x ./docker/entrypoint.sh
