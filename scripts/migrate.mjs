@@ -51,12 +51,14 @@ export async function runMigrations({
   console.log('Migration step completed.');
 }
 
+export function handleMigrationFailure(error, processImpl = process, consoleImpl = console) {
+  const message = error instanceof Error ? error.message : String(error);
+  consoleImpl.error(`Migration step failed: ${message}`);
+  processImpl.exit(1);
+}
+
 const isDirectExecution = process.argv[1] === fileURLToPath(import.meta.url);
 
 if (isDirectExecution) {
-  runMigrations().catch((error) => {
-    const message = error instanceof Error ? error.message : String(error);
-    console.error(`Migration step failed: ${message}`);
-    process.exit(1);
-  });
+  runMigrations().catch((error) => handleMigrationFailure(error));
 }

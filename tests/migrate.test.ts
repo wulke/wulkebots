@@ -2,7 +2,7 @@
 
 import { describe, expect, it, vi } from 'vitest';
 
-import { runMigrations } from '../scripts/migrate.mjs';
+import { handleMigrationFailure, runMigrations } from '../scripts/migrate.mjs';
 
 describe('runMigrations', () => {
   // @spec INFRA-DKR-003
@@ -81,5 +81,22 @@ describe('runMigrations', () => {
     ).rejects.toThrowError('boom');
 
     expect(close).toHaveBeenCalledTimes(1);
+  });
+
+  // @spec INFRA-DB-003
+  it('logs the failure reason and exits with code 1 during direct execution failure handling', () => {
+    const exit = vi.fn();
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    handleMigrationFailure(
+      new Error('boom'),
+      { exit } as unknown as typeof process,
+      console,
+    );
+
+    expect(error).toHaveBeenCalledWith('Migration step failed: boom');
+    expect(exit).toHaveBeenCalledWith(1);
+
+    error.mockRestore();
   });
 });

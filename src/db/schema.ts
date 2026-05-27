@@ -1,7 +1,6 @@
 import { relations, sql } from 'drizzle-orm';
 import { check, index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
-// @spec INFRA-DB-004
 export const users = sqliteTable(
   'users',
   {
