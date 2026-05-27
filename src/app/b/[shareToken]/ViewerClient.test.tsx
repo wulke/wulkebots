@@ -38,7 +38,12 @@ describe('ViewerClient', () => {
     expect(figure).toHaveStyle({ transform: 'translate(-64px, -32px)' });
 
     fireEvent.click(screen.getByRole('button', { name: 'Robo Rex' }));
-    expect(screen.getByText('First quote')).toBeVisible();
+    const speechBubble = screen.getByRole('status');
+    expect(speechBubble).toHaveTextContent('First quote');
+    expect(speechBubble).toHaveStyle({
+      maxWidth: '80vw',
+      wordBreak: 'break-word',
+    });
     expect(figure).toHaveAttribute('data-bouncing', 'true');
 
     fireEvent.click(screen.getByRole('button', { name: 'Robo Rex' }));
@@ -48,7 +53,14 @@ describe('ViewerClient', () => {
     expect(screen.getByText('First quote')).toBeVisible();
 
     fireEvent.error(screen.getByAltText('Robo Rex'));
-    expect(screen.getByTestId('viewer-placeholder')).toBeVisible();
+    const placeholder = screen.getByTestId('viewer-placeholder');
+    expect(placeholder).toBeVisible();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Move right' }));
+    expect(figure).toHaveStyle({ transform: 'translate(-32px, -32px)' });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Robo Rex' }));
+    expect(screen.getByText('Second quote')).toBeVisible();
 
     expect(fetchSpy).not.toHaveBeenCalled();
 
@@ -59,7 +71,7 @@ describe('ViewerClient', () => {
         quotes={['First quote', 'Second quote']}
       />,
     );
-    expect(screen.getByText('First quote')).toBeVisible();
+    expect(screen.getByText('Second quote')).toBeVisible();
 
     unmount();
 
