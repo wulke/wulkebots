@@ -6,6 +6,6 @@ describe('next.config.js', () => {
     const nextConfig = await import('../next.config.js');
 
     expect(nextConfig.default.output).toBe('standalone');
-    expect(nextConfig.default.images.unoptimized).toBe(true);
+    expect(nextConfig.default.images?.unoptimized).toBe(true);
   });
 });
