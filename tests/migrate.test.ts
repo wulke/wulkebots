@@ -2,7 +2,7 @@
 
 import { describe, expect, it, vi } from 'vitest';
 
-import { runMigrations } from '../scripts/migrate.mjs';
+import { handleMigrationFailure, runMigrations } from '../scripts/migrate.mjs';
 
 describe('runMigrations', () => {
   // @spec INFRA-DKR-003
@@ -57,5 +57,46 @@ describe('runMigrations', () => {
         } as NodeJS.ProcessEnv,
       }),
     ).rejects.toThrowError('UPLOADS_DIR is required');
+  });
+
+  // @spec INFRA-DB-003
+  it('rethrows migration failures after closing the database client', async () => {
+    const migrateImpl = vi.fn().mockImplementation(() => {
+      throw new Error('boom');
+    });
+    const close = vi.fn();
+    const createDatabaseClient = vi.fn().mockReturnValue({ db: { tag: 'db' }, close });
+
+    await expect(
+      runMigrations({
+        env: {
+          NODE_ENV: 'test',
+          DATABASE_URL: '/data/wulkebots.db',
+          UPLOADS_DIR: '/uploads',
+        } as NodeJS.ProcessEnv,
+        mkdirImpl: vi.fn().mockResolvedValue(undefined),
+        createDatabaseClient,
+        migrateImpl,
+      }),
+    ).rejects.toThrowError('boom');
+
+    expect(close).toHaveBeenCalledTimes(1);
+  });
+
+  // @spec INFRA-DB-003
+  it('logs the failure reason and exits with code 1 during direct execution failure handling', () => {
+    const exit = vi.fn();
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    handleMigrationFailure(
+      new Error('boom'),
+      { exit } as unknown as typeof process,
+      console,
+    );
+
+    expect(error).toHaveBeenCalledWith('Migration step failed: boom');
+    expect(exit).toHaveBeenCalledWith(1);
+
+    error.mockRestore();
   });
 });
