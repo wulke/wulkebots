@@ -14,9 +14,10 @@ describe('runMigrations', () => {
 
     await runMigrations({
       env: {
+        NODE_ENV: 'test',
         DATABASE_URL: '/data/wulkebots.db',
         UPLOADS_DIR: '/uploads',
-      },
+      } as NodeJS.ProcessEnv,
       mkdirImpl,
       createDatabaseClient,
       migrateImpl,
@@ -39,8 +40,9 @@ describe('runMigrations', () => {
     await expect(
       runMigrations({
         env: {
+          NODE_ENV: 'test',
           UPLOADS_DIR: '/uploads',
-        },
+        } as NodeJS.ProcessEnv,
       }),
     ).rejects.toThrowError('DATABASE_URL is required');
   });
@@ -50,8 +52,9 @@ describe('runMigrations', () => {
     await expect(
       runMigrations({
         env: {
+          NODE_ENV: 'test',
           DATABASE_URL: '/data/wulkebots.db',
-        },
+        } as NodeJS.ProcessEnv,
       }),
     ).rejects.toThrowError('UPLOADS_DIR is required');
   });
