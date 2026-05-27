@@ -48,49 +48,54 @@ describe('getViewerBot', () => {
 
       CREATE INDEX quotes_bot_id_idx ON quotes (bot_id);
     `);
-    db = drizzle(sqlite);
+    db = drizzle(sqlite, { schema: { bots, quotes, users } });
   });
 
   // @spec VIEW-DATA-001
   it('returns bot data with quotes ordered by display_order for the requested share token', async () => {
-    const [user] = db
+    const userInsertResult = db
       .insert(users)
       .values({
         email: 'parent@example.com',
         passwordHash: 'hash',
       })
-      .returning();
+      .run();
+    const userId = Number(userInsertResult.lastInsertRowid);
 
-    const [bot] = db
+    const botInsertResult = db
       .insert(bots)
       .values({
-        userId: user.id,
+        userId,
         name: 'Robo Rex',
         imagePath: '17/drawing.png',
         shareToken: 'viewer-token',
       })
-      .returning();
+      .run();
+    const botId = Number(botInsertResult.lastInsertRowid);
 
-    db.insert(quotes).values([
-      {
-        botId: bot.id,
-        text: 'Third quote',
-        displayOrder: 2,
-      },
-      {
-        botId: bot.id,
-        text: 'First quote',
-        displayOrder: 0,
-      },
-      {
-        botId: bot.id,
-        text: 'Second quote',
-        displayOrder: 1,
-      },
-    ]);
+    db
+      .insert(quotes)
+      .values([
+        {
+          botId,
+          text: 'Third quote',
+          displayOrder: 2,
+        },
+        {
+          botId,
+          text: 'First quote',
+          displayOrder: 0,
+        },
+        {
+          botId,
+          text: 'Second quote',
+          displayOrder: 1,
+        },
+      ])
+      .run();
 
     await expect(getViewerBot('viewer-token', db)).resolves.toEqual({
-      id: bot.id,
+      id: botId,
       name: 'Robo Rex',
       imagePath: '17/drawing.png',
       quotes: ['First quote', 'Second quote', 'Third quote'],

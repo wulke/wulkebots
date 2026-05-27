@@ -1,3 +1,5 @@
+import React from 'react';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -45,7 +47,7 @@ describe('ViewerClient', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Robo Rex' }));
     expect(screen.getByText('First quote')).toBeVisible();
 
-    fireEvent.error(image);
+    fireEvent.error(screen.getByAltText('Robo Rex'));
     expect(screen.getByTestId('viewer-placeholder')).toBeVisible();
 
     expect(fetchSpy).not.toHaveBeenCalled();
@@ -61,7 +63,7 @@ describe('ViewerClient', () => {
 
     unmount();
 
-    render(
+    const remounted = render(
       <ViewerClient
         botName="Robo Rex"
         imageUrl="/api/images/17/drawing.png"
@@ -71,6 +73,7 @@ describe('ViewerClient', () => {
 
     expect(screen.queryByText('First quote')).not.toBeInTheDocument();
     expect(screen.getByTestId('viewer-figure')).toHaveStyle({ transform: 'translate(0px, 0px)' });
+    remounted.unmount();
 
     fetchSpy.mockRestore();
   });
